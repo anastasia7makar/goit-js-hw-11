@@ -1,10 +1,23 @@
 import axios from 'axios';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { lightbox } from './js/lightbox';
 
 const form = document.querySelector('.search-form');
 const galleryEl = document.querySelector('.gallery');
+const loadMoreButton = document.querySelector('.load-more');
+const target = document.querySelector('.js-guard');
 
-console.dir(form);
+let currentPage = 1;
+
+loadMoreButton.classList.add('is-hidden');
+
+const options = {
+  rootMargin: '50px',
+  root: null,
+  threshold: 0.3,
+};
+
+const observer = new IntersectionObserver(handleLoadMoreButtonClick, options);
 
 form.addEventListener('submit', handleFormSubmit);
 
@@ -18,6 +31,8 @@ function fetchGallery(query) {
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: true,
+      page: currentPage,
+      per_page: 40,
     },
   };
   return axios(fetchOptions);
@@ -27,7 +42,11 @@ async function handleFormSubmit(evt) {
   evt.preventDefault();
 
   try {
-    const query = evt.currentTarget.elements.searchQuery.value.trim();
+    currentPage = 1;
+
+    // loadMoreButton.classList.remove('is-hidden');
+
+    const query = form.elements.searchQuery.value.trim();
 
     const { data } = await fetchGallery(query);
 
@@ -39,7 +58,10 @@ async function handleFormSubmit(evt) {
       );
     }
 
-    galleryEl.insertAdjacentHTML('beforeend', createMarkup(arrHits));
+    galleryEl.innerHTML = createMarkup(arrHits);
+
+    observer.observe(target);
+    lightbox.refresh();
   } catch (error) {
     console.log(error);
   }
@@ -58,6 +80,7 @@ function createMarkup(obj) {
         downloads,
       }) =>
         `<div class="photo-card">
+        <a href="${largeImageURL}">
         <img src="${webformatURL}" alt="${tags}" loading="lazy" />
         <div class="info">
           <p class="info-item">
@@ -73,7 +96,46 @@ function createMarkup(obj) {
             <b>Downloads ${downloads}</b>
           </p>
         </div>
+        </a>
       </div>`
     )
     .join('');
+}
+
+function handleLoadMoreButtonClick(entries, observer) {
+  entries.forEach(async entry => {
+    if (entry.isIntersecting) {
+      const query = form.elements.searchQuery.value.trim();
+
+      currentPage += 1;
+
+      try {
+        const { data } = await fetchGallery(query);
+
+        const arrHits = data.hits;
+
+        const currentQuantity = currentPage * arrHits.length;
+
+        const total = data.totalHits;
+
+        if (currentQuantity < total) {
+          Notify.success(`Hooray! We found ${total} images.`);
+        }
+
+        if (currentQuantity >= total) {
+          observer.unobserve(target);
+          loadMoreButton.classList.add('is-hidden');
+          Notify.info(
+            "We're sorry, but you've reached the end of search results."
+          );
+        }
+
+        galleryEl.insertAdjacentHTML('beforeend', createMarkup(arrHits));
+
+        lightbox.refresh();
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  });
 }
