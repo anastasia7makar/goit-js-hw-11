@@ -1,0 +1,60 @@
+:root {
+  --border-color: #eeeeee;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0 auto;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.load-more.is-hidden {
+  display: none;}
+
+
+.gallery {
+  width: 1200px;
+  margin: 40px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.photo-card {
+  width: 250px;
+  margin-bottom: 20px;
+}
+
+.photo-card:nth-last-child(-n + 4) {
+  margin-bottom: 0;
+}
+
+img {
+  display: block;
+  width: 250px;
+  height: 175px;
+  border-radius: 4px;
+}
+
+a {
+  text-decoration: none;
+  color: #777;
+}
+
+.info {
+  display: flex;
+  text-align: center;
+  padding: 12px 4px;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.info-item {
+  font-size: 12px;
+}
