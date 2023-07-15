@@ -47,9 +47,7 @@ async function handleFormSubmit(evt) {
     // loadMoreButton.classList.remove('is-hidden');
 
     const query = form.elements.searchQuery.value.trim();
-
     const { data } = await fetchGallery(query);
-
     const arrHits = data.hits;
 
     if (arrHits.length === 0) {
@@ -111,11 +109,8 @@ function handleLoadMoreButtonClick(entries, observer) {
 
       try {
         const { data } = await fetchGallery(query);
-
         const arrHits = data.hits;
-
         const currentQuantity = currentPage * arrHits.length;
-
         const total = data.totalHits;
 
         if (currentQuantity < total) {
@@ -132,10 +127,22 @@ function handleLoadMoreButtonClick(entries, observer) {
 
         galleryEl.insertAdjacentHTML('beforeend', createMarkup(arrHits));
 
+        smoothScroll();
         lightbox.refresh();
       } catch (error) {
         console.log(error);
       }
     }
+  });
+}
+
+function smoothScroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
   });
 }
