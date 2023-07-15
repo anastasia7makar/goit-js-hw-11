@@ -49,8 +49,9 @@ async function handleFormSubmit(evt) {
     const query = form.elements.searchQuery.value.trim();
     const { data } = await fetchGallery(query);
     const arrHits = data.hits;
+    const quantity = arrHits.length;
 
-    if (arrHits.length === 0) {
+    if (!quantity) {
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
@@ -113,13 +114,12 @@ function handleLoadMoreButtonClick(entries, observer) {
         const currentQuantity = currentPage * arrHits.length;
         const total = data.totalHits;
 
-        if (currentQuantity < total) {
+        if (currentQuantity) {
           Notify.success(`Hooray! We found ${total} images.`);
         }
 
-        if (currentQuantity >= total) {
+        if (currentQuantity >= total && currentQuantity) {
           observer.unobserve(target);
-          loadMoreButton.classList.add('is-hidden');
           Notify.info(
             "We're sorry, but you've reached the end of search results."
           );
