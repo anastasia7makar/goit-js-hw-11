@@ -45,6 +45,8 @@ async function handleFormSubmit(evt) {
   try {
     currentPage = 1;
 
+    window.scroll({ top: 0 });
+
     // loadMoreButton.classList.remove('is-hidden');
 
     const query = form.elements.searchQuery.value.trim();
@@ -108,11 +110,11 @@ function handleLoadMoreButtonClick(entries, observer) {
       const query = form.elements.searchQuery.value.trim();
 
       try {
-        if (isReachedEnd) { 
-           observer.unobserve(target);
-           return Notify.info(
-             "We're sorry, but you've reached the end of search results."
-           );
+        if (isReachedEnd) {
+          observer.unobserve(target);
+          return Notify.info(
+            "We're sorry, but you've reached the end of search results."
+          );
         }
 
         const { data } = await fetchGallery(query);
