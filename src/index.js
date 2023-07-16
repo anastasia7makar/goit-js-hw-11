@@ -8,6 +8,7 @@ const loadMoreButton = document.querySelector('.load-more');
 const target = document.querySelector('.js-guard');
 
 let currentPage = 1;
+let isReachedEnd = false;
 
 loadMoreButton.classList.add('is-hidden');
 
@@ -106,9 +107,14 @@ function handleLoadMoreButtonClick(entries, observer) {
     if (entry.isIntersecting) {
       const query = form.elements.searchQuery.value.trim();
 
-      currentPage += 1;
-
       try {
+        if (isReachedEnd) { 
+           observer.unobserve(target);
+           return Notify.info(
+             "We're sorry, but you've reached the end of search results."
+           );
+        }
+
         const { data } = await fetchGallery(query);
         const arrHits = data.hits;
         const currentQuantity = currentPage * arrHits.length;
@@ -118,14 +124,10 @@ function handleLoadMoreButtonClick(entries, observer) {
           Notify.success(`Hooray! We found ${total} images.`);
         }
 
-        if (currentQuantity >= total && currentQuantity) {
-          observer.unobserve(target);
-          Notify.info(
-            "We're sorry, but you've reached the end of search results."
-          );
-        }
-
         galleryEl.insertAdjacentHTML('beforeend', createMarkup(arrHits));
+
+        currentPage += 1;
+        isReachedEnd = currentQuantity >= total;
 
         smoothScroll();
         lightbox.refresh();
