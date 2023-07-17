@@ -4,13 +4,11 @@ import { lightbox } from './js/lightbox';
 
 const form = document.querySelector('.search-form');
 const galleryEl = document.querySelector('.gallery');
-const loadMoreButton = document.querySelector('.load-more');
 const target = document.querySelector('.js-guard');
 
 let currentPage = 1;
+let currentQuantity = 0;
 let isReachedEnd = false;
-
-loadMoreButton.classList.add('is-hidden');
 
 const options = {
   rootMargin: '50px',
@@ -47,18 +45,18 @@ async function handleFormSubmit(evt) {
 
     window.scroll({ top: 0 });
 
-    // loadMoreButton.classList.remove('is-hidden');
-
     const query = form.elements.searchQuery.value.trim();
     const { data } = await fetchGallery(query);
     const arrHits = data.hits;
     const quantity = arrHits.length;
 
     if (!quantity) {
-      Notify.failure(
+      return Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
     }
+
+    Notify.success(`Hooray! We found ${data.total} images.`);
 
     galleryEl.innerHTML = createMarkup(arrHits);
 
@@ -119,17 +117,15 @@ function handleLoadMoreButtonClick(entries, observer) {
 
         const { data } = await fetchGallery(query);
         const arrHits = data.hits;
-        const currentQuantity = currentPage * arrHits.length;
-        const total = data.totalHits;
+        currentQuantity += arrHits.length;
 
-        if (currentQuantity) {
-          Notify.success(`Hooray! We found ${total} images.`);
-        }
+        const total = data.totalHits;
 
         galleryEl.insertAdjacentHTML('beforeend', createMarkup(arrHits));
 
         currentPage += 1;
         isReachedEnd = currentQuantity >= total;
+        console.log(currentQuantity, total, 'isReachedEnd');
 
         smoothScroll();
         lightbox.refresh();
