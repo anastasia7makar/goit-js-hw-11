@@ -42,6 +42,8 @@ async function handleFormSubmit(evt) {
 
   try {
     currentPage = 1;
+    currentQuantity = 0;
+    isReachedEnd = false;
 
     window.scroll({ top: 0 });
 
